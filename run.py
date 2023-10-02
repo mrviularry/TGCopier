@@ -10,15 +10,15 @@ from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
 
 # MetaAPI Credentials
-API_KEY = os.environ.get("API_KEY")
-ACCOUNT_ID = os.environ.get("ACCOUNT_ID")
+API_KEY = os.environ.get("eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJlMDAyYzQ3NDNlZTEzMTFlYmFjZGRlMWEwMjNiMmMzYSIsInBlcm1pc3Npb25zIjpbXSwiYWNjZXNzUnVsZXMiOlt7ImlkIjoidHJhZGluZy1hY2NvdW50LW1hbmFnZW1lbnQtYXBpIiwibWV0aG9kcyI6WyJ0cmFkaW5nLWFjY291bnQtbWFuYWdlbWVudC1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1yZXN0LWFwaSIsIm1ldGhvZHMiOlsibWV0YWFwaS1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1ycGMtYXBpIiwibWV0aG9kcyI6WyJtZXRhYXBpLWFwaTp3czpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1yZWFsLXRpbWUtc3RyZWFtaW5nLWFwaSIsIm1ldGhvZHMiOlsibWV0YWFwaS1hcGk6d3M6cHVibGljOio6KiJdLCJyb2xlcyI6WyJyZWFkZXIiLCJ3cml0ZXIiXSwicmVzb3VyY2VzIjpbIio6JFVTRVJfSUQkOioiXX0seyJpZCI6Im1ldGFzdGF0cy1hcGkiLCJtZXRob2RzIjpbIm1ldGFzdGF0cy1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoicmlzay1tYW5hZ2VtZW50LWFwaSIsIm1ldGhvZHMiOlsicmlzay1tYW5hZ2VtZW50LWFwaTpyZXN0OnB1YmxpYzoqOioiXSwicm9sZXMiOlsicmVhZGVyIiwid3JpdGVyIl0sInJlc291cmNlcyI6WyIqOiRVU0VSX0lEJDoqIl19LHsiaWQiOiJjb3B5ZmFjdG9yeS1hcGkiLCJtZXRob2RzIjpbImNvcHlmYWN0b3J5LWFwaTpyZXN0OnB1YmxpYzoqOioiXSwicm9sZXMiOlsicmVhZGVyIiwid3JpdGVyIl0sInJlc291cmNlcyI6WyIqOiRVU0VSX0lEJDoqIl19LHsiaWQiOiJtdC1tYW5hZ2VyLWFwaSIsIm1ldGhvZHMiOlsibXQtbWFuYWdlci1hcGk6cmVzdDpkZWFsaW5nOio6KiIsIm10LW1hbmFnZXItYXBpOnJlc3Q6cHVibGljOio6KiJdLCJyb2xlcyI6WyJyZWFkZXIiLCJ3cml0ZXIiXSwicmVzb3VyY2VzIjpbIio6JFVTRVJfSUQkOioiXX1dLCJ0b2tlbklkIjoiMjAyMTAyMTMiLCJpbXBlcnNvbmF0ZWQiOmZhbHNlLCJyZWFsVXNlcklkIjoiZTAwMmM0NzQzZWUxMzExZWJhY2RkZTFhMDIzYjJjM2EiLCJpYXQiOjE2OTYxNzMxMjksImV4cCI6MTcwMzk0OTEyOX0.jjD8LjNNBfdYD3iobpRA0q4UyoPKo__mfucYcVy2pDSFWtT0SVhoGngfdpAFDZ9f9eOwqf-WRegcM8W9JPYXR5RRkU_SRkKCsNiKglnzKt1LU_0sRyJhmhUXaOqnRuw-GR0VPdSVaonzHQcIGEp950qW4Y9qfv6Nc9pCg304vAMaIgGMdR4fX5GZBprIyOHBtaK_bCGvsUVe3yFZvK64lrsIPRnwTB_I_9O4M3Ro4XWuQz97bDc5sgfacDvImGJbpPOZNlltPue5MVTySLncbhx81ea50HjcYkxbqeG3VQ-LwvSYrTSh_R0jPO-k9ftP_BDwifTvPIMNgI6g0G2lFq-MqXEJIMHlIKtHBEz33d87yJgtYmLkVr-v8tV03RTAyOaeZDCI-tb-FPAO6SqVM2WGYDLQ-k1j3acxyKvv5o3z5e_2pzh_lAdrBXEj-hWfSGum7yuIpj_imBOLhHa6ICdbYYjCOprpPthZR61A2mCwsxkfvYNwzzjqQX9L2AKIPDgI2t5o3Er7-FoDLql_ZTFphl9q7M09mIALkzLS8Iw0i4rtovX9J9y0_cV-53lcr9TCz-oIS73a6dJjAh5dvynStyVC4yDuPGQ8YE3TkN7WBVLEWGqwHfZm2kkN4-Qr3OpJ3iY9_ei-hm03-p-4UpYDCgRLCOTvCefiDwiyZpM")
+ACCOUNT_ID = os.environ.get("fe2d02f4-a83d-462e-b75c-3340c833e7e1")
 
 # Telegram Credentials
-TOKEN = os.environ.get("TOKEN")
-TELEGRAM_USER = os.environ.get("TELEGRAM_USER")
+TOKEN = os.environ.get("6518565683:AAFSRuOPw11nEcfX75IGm0zIEAWdgB2xLww")
+TELEGRAM_USER = os.environ.get("donvc")
 
 # Heroku Credentials
-APP_URL = os.environ.get("APP_URL")
+APP_URL = os.environ.get("4.236.182.198")
 
 # Port number for Telegram bot web hook
 PORT = int(os.environ.get('PORT', '8443'))
@@ -35,7 +35,7 @@ CALCULATE, TRADE, DECISION = range(3)
 SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
 
 # RISK FACTOR
-RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
+RISK_FACTOR = float(os.environ.get("0.005"))
 
 
 # Helper Functions
