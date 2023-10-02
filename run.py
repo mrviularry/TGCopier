@@ -4,21 +4,26 @@ import logging
 import math
 import os
 
+try:
+    from typing import Literal
+except ImportError:
+    from typing_extensions import Literal
+
 from metaapi_cloud_sdk import MetaApi
 from prettytable import PrettyTable
 from telegram import ParseMode, Update
 from telegram.ext import CommandHandler, Filters, MessageHandler, Updater, ConversationHandler, CallbackContext
 
 # MetaAPI Credentials
-API_KEY = os.environ.get("eyJhbGciOiJSUzUxMiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiJlMDAyYzQ3NDNlZTEzMTFlYmFjZGRlMWEwMjNiMmMzYSIsInBlcm1pc3Npb25zIjpbXSwiYWNjZXNzUnVsZXMiOlt7ImlkIjoidHJhZGluZy1hY2NvdW50LW1hbmFnZW1lbnQtYXBpIiwibWV0aG9kcyI6WyJ0cmFkaW5nLWFjY291bnQtbWFuYWdlbWVudC1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1yZXN0LWFwaSIsIm1ldGhvZHMiOlsibWV0YWFwaS1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1ycGMtYXBpIiwibWV0aG9kcyI6WyJtZXRhYXBpLWFwaTp3czpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciIsIndyaXRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoibWV0YWFwaS1yZWFsLXRpbWUtc3RyZWFtaW5nLWFwaSIsIm1ldGhvZHMiOlsibWV0YWFwaS1hcGk6d3M6cHVibGljOio6KiJdLCJyb2xlcyI6WyJyZWFkZXIiLCJ3cml0ZXIiXSwicmVzb3VyY2VzIjpbIio6JFVTRVJfSUQkOioiXX0seyJpZCI6Im1ldGFzdGF0cy1hcGkiLCJtZXRob2RzIjpbIm1ldGFzdGF0cy1hcGk6cmVzdDpwdWJsaWM6KjoqIl0sInJvbGVzIjpbInJlYWRlciJdLCJyZXNvdXJjZXMiOlsiKjokVVNFUl9JRCQ6KiJdfSx7ImlkIjoicmlzay1tYW5hZ2VtZW50LWFwaSIsIm1ldGhvZHMiOlsicmlzay1tYW5hZ2VtZW50LWFwaTpyZXN0OnB1YmxpYzoqOioiXSwicm9sZXMiOlsicmVhZGVyIiwid3JpdGVyIl0sInJlc291cmNlcyI6WyIqOiRVU0VSX0lEJDoqIl19LHsiaWQiOiJjb3B5ZmFjdG9yeS1hcGkiLCJtZXRob2RzIjpbImNvcHlmYWN0b3J5LWFwaTpyZXN0OnB1YmxpYzoqOioiXSwicm9sZXMiOlsicmVhZGVyIiwid3JpdGVyIl0sInJlc291cmNlcyI6WyIqOiRVU0VSX0lEJDoqIl19LHsiaWQiOiJtdC1tYW5hZ2VyLWFwaSIsIm1ldGhvZHMiOlsibXQtbWFuYWdlci1hcGk6cmVzdDpkZWFsaW5nOio6KiIsIm10LW1hbmFnZXItYXBpOnJlc3Q6cHVibGljOio6KiJdLCJyb2xlcyI6WyJyZWFkZXIiLCJ3cml0ZXIiXSwicmVzb3VyY2VzIjpbIio6JFVTRVJfSUQkOioiXX1dLCJ0b2tlbklkIjoiMjAyMTAyMTMiLCJpbXBlcnNvbmF0ZWQiOmZhbHNlLCJyZWFsVXNlcklkIjoiZTAwMmM0NzQzZWUxMzExZWJhY2RkZTFhMDIzYjJjM2EiLCJpYXQiOjE2OTYxNzMxMjksImV4cCI6MTcwMzk0OTEyOX0.jjD8LjNNBfdYD3iobpRA0q4UyoPKo__mfucYcVy2pDSFWtT0SVhoGngfdpAFDZ9f9eOwqf-WRegcM8W9JPYXR5RRkU_SRkKCsNiKglnzKt1LU_0sRyJhmhUXaOqnRuw-GR0VPdSVaonzHQcIGEp950qW4Y9qfv6Nc9pCg304vAMaIgGMdR4fX5GZBprIyOHBtaK_bCGvsUVe3yFZvK64lrsIPRnwTB_I_9O4M3Ro4XWuQz97bDc5sgfacDvImGJbpPOZNlltPue5MVTySLncbhx81ea50HjcYkxbqeG3VQ-LwvSYrTSh_R0jPO-k9ftP_BDwifTvPIMNgI6g0G2lFq-MqXEJIMHlIKtHBEz33d87yJgtYmLkVr-v8tV03RTAyOaeZDCI-tb-FPAO6SqVM2WGYDLQ-k1j3acxyKvv5o3z5e_2pzh_lAdrBXEj-hWfSGum7yuIpj_imBOLhHa6ICdbYYjCOprpPthZR61A2mCwsxkfvYNwzzjqQX9L2AKIPDgI2t5o3Er7-FoDLql_ZTFphl9q7M09mIALkzLS8Iw0i4rtovX9J9y0_cV-53lcr9TCz-oIS73a6dJjAh5dvynStyVC4yDuPGQ8YE3TkN7WBVLEWGqwHfZm2kkN4-Qr3OpJ3iY9_ei-hm03-p-4UpYDCgRLCOTvCefiDwiyZpM")
-ACCOUNT_ID = os.environ.get("fe2d02f4-a83d-462e-b75c-3340c833e7e1")
+API_KEY = os.environ.get("API_KEY")
+ACCOUNT_ID = os.environ.get("ACCOUNT_ID")
 
 # Telegram Credentials
-TOKEN = os.environ.get("6518565683:AAFSRuOPw11nEcfX75IGm0zIEAWdgB2xLww")
-TELEGRAM_USER = os.environ.get("donvc")
+TOKEN = os.environ.get("TOKEN")
+TELEGRAM_USER = os.environ.get("TELEGRAM_USER")
 
 # Heroku Credentials
-APP_URL = os.environ.get("4.236.182.198")
+APP_URL = os.environ.get("APP_URL")
 
 # Port number for Telegram bot web hook
 PORT = int(os.environ.get('PORT', '8443'))
@@ -32,10 +37,10 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
+SYMBOLS = ['AUDCADm', 'AUDCHFm', 'AUDJPYm', 'AUDNZDm', 'AUDUSDm', 'CADCHFm', 'CADJPYm', 'CHFJPYm', 'EURAUDm', 'EURCADm', 'EURCHFm', 'EURGBPm', 'EURJPYm', 'EURNZDm', 'EURUSDm', 'GBPAUDm', 'GBPCADm', 'GBPCHFm', 'GBPJPYm', 'GBPNZDm', 'GBPUSDm', 'NOW', 'NZDCADm', 'NZDCHFm', 'NZDJPYm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm']
 
 # RISK FACTOR
-RISK_FACTOR = float(os.environ.get("0.005"))
+RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
 
 
 # Helper Functions
@@ -51,58 +56,52 @@ def ParseSignal(signal: str) -> dict:
 
     # converts message to list of strings for parsing
     signal = signal.splitlines()
-    signal = [line.rstrip() for line in signal]
+    signal = [line.strip() for line in signal]
 
     trade = {}
 
     # determines the order type of the trade
-    if('Buy Limit'.lower() in signal[0].lower()):
+    if 'Buy Limit'.lower() in signal[0].lower():
         trade['OrderType'] = 'Buy Limit'
-
-    elif('Sell Limit'.lower() in signal[0].lower()):
+    elif 'Sell Limit'.lower() in signal[0].lower():
         trade['OrderType'] = 'Sell Limit'
-
-    elif('Buy Stop'.lower() in signal[0].lower()):
+    elif 'Buy Stop'.lower() in signal[0].lower():
         trade['OrderType'] = 'Buy Stop'
-
-    elif('Sell Stop'.lower() in signal[0].lower()):
+    elif 'Sell Stop'.lower() in signal[0].lower():
         trade['OrderType'] = 'Sell Stop'
-
-    elif('Buy'.lower() in signal[0].lower()):
+    elif 'Buy'.lower() in signal[0].lower():
         trade['OrderType'] = 'Buy'
-    
-    elif('Sell'.lower() in signal[0].lower()):
+    elif 'Sell'.lower() in signal[0].lower():
         trade['OrderType'] = 'Sell'
-    
-    # returns an empty dictionary if an invalid order type was given
     else:
-        return {}
+        return {}  # returns an empty dictionary if an invalid order type was given
 
     # extracts symbol from trade signal
-    trade['Symbol'] = (signal[0].split())[-1].upper()
-    
+    trade['Symbol'] = (signal[0].split())[0]
+
     # checks if the symbol is valid, if not, returns an empty dictionary
-    if(trade['Symbol'] not in SYMBOLS):
+    if trade['Symbol'] not in SYMBOLS:
         return {}
-    
-    # checks wheter or not to convert entry to float because of market exectution option ("NOW")
-    if(trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell'):
-        trade['Entry'] = (signal[1].split())[-1]
-    
+
+    # checks whether or not to convert entry to float because of market execution option ("NOW")
+    if trade['OrderType'] == 'Buy' or trade['OrderType'] == 'Sell':
+        trade['Entry'] = float((signal[0].split('@')[-1]).strip())
     else:
-        trade['Entry'] = float((signal[1].split())[-1])
-    
-    trade['StopLoss'] = float((signal[2].split())[-1])
-    trade['TP'] = [float((signal[3].split())[-1])]
+        trade['Entry'] = float((signal[0].split('@')[-1]).strip())
+
+    trade['StopLoss'] = float((signal[2].split('@')[-1]).strip())
+    trade['TP'] = [float((signal[i].split('@')[-1])) for i in range(2, len(signal)) if 'T' in signal[i]]
+
 
     # checks if there's a fourth line and parses it for TP2
-    if(len(signal) > 4):
-        trade['TP'].append(float(signal[4].split()[-1]))
-    
+    # if len(signal) > 4:
+    #     trade['TP'].append(float(signal[4].split()[-1]))
+
     # adds risk factor to trade
     trade['RiskFactor'] = RISK_FACTOR
 
     return trade
+    
 
 def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """Calculates information from given trade including stop loss and take profit in pips, posiition size, and potential loss/profit.
@@ -114,10 +113,10 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """
 
     # calculates the stop loss in pips
-    if(trade['Symbol'] == 'XAUUSD'):
+    if(trade['Symbol'] == 'XAUUSDm'):
         multiplier = 0.1
 
-    elif(trade['Symbol'] == 'XAGUSD'):
+    elif(trade['Symbol'] == 'XAGUSDm'):
         multiplier = 0.001
 
     elif(str(trade['Entry']).index('.') >= 2):
@@ -329,7 +328,7 @@ def PlaceTrade(update: Update, context: CallbackContext) -> int:
         
         except Exception as error:
             logger.error(f'Error: {error}')
-            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
+            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nSYMBOL BUY/SELL @ \nSL @ \nTP @ \n\nOr use the /cancel to command to cancel this action."
             update.effective_message.reply_text(errorMessage)
 
             # returns to TRADE state to reattempt trade parsing
@@ -368,7 +367,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
         
         except Exception as error:
             logger.error(f'Error: {error}')
-            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nBUY/SELL SYMBOL\nEntry \nSL \nTP \n\nOr use the /cancel to command to cancel this action."
+            errorMessage = f"There was an error parsing this trade 😕\n\nError: {error}\n\nPlease re-enter trade with this format:\n\nSYMBOL BUY/SELL @ \n \nSL @ \nTP @ \n\nOr use the /cancel to command to cancel this action."
             update.effective_message.reply_text(errorMessage)
 
             # returns to CALCULATE to reattempt trade parsing
@@ -378,7 +377,7 @@ def CalculateTrade(update: Update, context: CallbackContext) -> int:
     asyncio.run(ConnectMetaTrader(update, context.user_data['trade'], False))
 
     # asks if user if they would like to enter or decline trade
-    update.effective_message.reply_text("Would you like to enter this trade?\nTo enter, select: /yes\nTo decline, select: /no")
+    update.effective_message.reply_text("Check order Position Size ...\n Would you like to enter this trade?\nTo enter, select: /yes\nTo decline, select: /no")
 
     return DECISION
 
@@ -425,9 +424,9 @@ def help(update: Update, context: CallbackContext) -> None:
     help_message = "This bot is used to automatically enter trades onto your MetaTrader account directly from Telegram. To begin, ensure that you are authorized to use this bot by adjusting your Python script or environment variables.\n\nThis bot supports all trade order types (Market Execution, Limit, and Stop)\n\nAfter an extended period away from the bot, please be sure to re-enter the start command to restart the connection to your MetaTrader account."
     commands = "List of commands:\n/start : displays welcome message\n/help : displays list of commands and example trades\n/trade : takes in user inputted trade for parsing and placement\n/calculate : calculates trade information for a user inputted trade"
     trade_example = "Example Trades 💴:\n\n"
-    market_execution_example = "Market Execution:\nBUY GBPUSD\nEntry NOW\nSL 1.14336\nTP 1.28930\nTP 1.29845\n\n"
-    limit_example = "Limit Execution:\nBUY LIMIT GBPUSD\nEntry 1.14480\nSL 1.14336\nTP 1.28930\n\n"
-    note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP1 while the other uses TP2.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
+    market_execution_example = "Market Execution:\nEURUSD Buy NOW @ 1.2000\n\nSL @ 1.14336\n\nTP @ 1.28930\nTP @ 1.29845\n\n"
+    limit_example = "Limit Execution:\nGBPUSD BUY LIMIT @ 1.14480\n\nSL @ 1.14336\n\nTP @ 1.28930\n\n"
+    note = "You are able to enter up to two take profits. If two are entered, both trades will use half of the position size, and one will use TP @ while the other uses TP @.\n\nNote: Use 'NOW' as the entry to enter a market execution trade."
 
     # sends messages to user
     update.effective_message.reply_text(help_message)
