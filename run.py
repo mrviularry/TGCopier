@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['AUDCADm', 'AUDCHFm', 'AUDJPYm', 'AUDNZDm', 'AUDUSDm', 'CADCHFm', 'CADJPYm', 'CHFJPYm', 'EURAUDm', 'EURCADm', 'EURCHFm', 'EURGBPm', 'EURJPYm', 'EURNZDm', 'EURUSDm', 'GBPAUDm', 'GBPCADm', 'GBPCHFm', 'GBPJPYm', 'GBPNZDm', 'GBPUSDm', 'NOW', 'NZDCADm', 'NZDCHFm', 'NZDJPYm', 'NZDUSDm', 'USDCADm', 'USDCHFm', 'USDJPYm', 'XAGUSDm', 'XAUUSDm']
+SYMBOLS = ['AUDCADp', 'AUDCHFp', 'AUDJPYp', 'AUDNZDp', 'AUDUSDp', 'CADCHFp', 'CADJPYp', 'CHFJPYp', 'EURAUDp', 'EURCADp', 'EURCHFp', 'EURGBPp', 'EURJPYp', 'EURNZDp', 'EURUSDp', 'GBPAUDp', 'GBPCADp', 'GBPCHFp', 'GBPJPYp', 'GBPNZDp', 'GBPUSDp', 'NOW', 'NZDCADp', 'NZDCHFp', 'NZDJPYp', 'NZDUSDp', 'USDCADp', 'USDCHFp', 'USDJPYp', 'XAGUSDp', 'XAUUSDp']
 
 # RISK FACTOR
 RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
