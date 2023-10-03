@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 CALCULATE, TRADE, DECISION = range(3)
 
 # allowed FX symbols
-SYMBOLS = ['AUDCADp', 'AUDCHFp', 'AUDJPYp', 'AUDNZDp', 'AUDUSDp', 'CADCHFp', 'CADJPYp', 'CHFJPYp', 'EURAUDp', 'EURCADp', 'EURCHFp', 'EURGBPp', 'EURJPYp', 'EURNZDp', 'EURUSDp', 'GBPAUDp', 'GBPCADp', 'GBPCHFp', 'GBPJPYp', 'GBPNZDp', 'GBPUSDp', 'NOW', 'NZDCADp', 'NZDCHFp', 'NZDJPYp', 'NZDUSDp', 'USDCADp', 'USDCHFp', 'USDJPYp', 'XAGUSDp', 'XAUUSDp']
+SYMBOLS = ['AUDCAD', 'AUDCHF', 'AUDJPY', 'AUDNZD', 'AUDUSD', 'CADCHF', 'CADJPY', 'CHFJPY', 'EURAUD', 'EURCAD', 'EURCHF', 'EURGBP', 'EURJPY', 'EURNZD', 'EURUSD', 'GBPAUD', 'GBPCAD', 'GBPCHF', 'GBPJPY', 'GBPNZD', 'GBPUSD', 'NOW', 'NZDCAD', 'NZDCHF', 'NZDJPY', 'NZDUSD', 'USDCAD', 'USDCHF', 'USDJPY', 'XAGUSD', 'XAUUSD']
 
 # RISK FACTOR
 RISK_FACTOR = float(os.environ.get("RISK_FACTOR"))
@@ -113,10 +113,10 @@ def GetTradeInformation(update: Update, trade: dict, balance: float) -> None:
     """
 
     # calculates the stop loss in pips
-    if(trade['Symbol'] == 'XAUUSDp'):
+    if(trade['Symbol'] == 'XAUUSD'):
         multiplier = 0.1
 
-    elif(trade['Symbol'] == 'XAGUSDp'):
+    elif(trade['Symbol'] == 'XAGUSD'):
         multiplier = 0.001
 
     elif(str(trade['Entry']).index('.') >= 2):
